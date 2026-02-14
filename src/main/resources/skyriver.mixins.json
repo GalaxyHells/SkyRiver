@@ -4,7 +4,9 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"ExampleMixin",
-        "InGameHudMixin"
+        "InGameHudMixin",
+        "ChatHudMixin",
+        "EndermanGlowMixin",
 	],
 	"injectors": {
 		"defaultRequire": 1

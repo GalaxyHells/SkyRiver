@@ -1,0 +1,81 @@
+//package com.galaxyhells.handler;
+//
+//import com.galaxyhells.SkyRiverConfig;
+//import net.minecraft.client.MinecraftClient;
+//import net.minecraft.sound.SoundEvents;
+//import net.minecraft.text.Text;
+//import net.minecraft.util.Formatting;
+//
+//public class BossAlertHandler {
+//    private static int remainingSeconds = 0;
+//    private static final int TWELVE_MINUTES = 12 * 60;
+//    private static long lastUpdateMillis = 0;
+//
+//    public static void checkBossMessage(Text messageText) {
+//        if (!SkyRiverConfig.bossAlertEnabled) return;
+//
+//        String cleanMessage = messageText.getString().replaceAll("(?i)§[0-9A-FK-ORX]", "");
+//
+//        if (cleanMessage.contains("[The End] O Enderman Mutante foi visto nas proximidades!")) {
+//            startTimer();
+//            displayVisualAlert();
+//        }
+//    }
+//
+//    public static void startTimer() {
+//        remainingSeconds = TWELVE_MINUTES;
+//        lastUpdateMillis = System.currentTimeMillis();
+//    }
+//
+//    public static void tickTimer() {
+//        if (remainingSeconds <= 0) return;
+//
+//        long now = System.currentTimeMillis();
+//        if (now - lastUpdateMillis >= 1000) {
+//            remainingSeconds--;
+//            lastUpdateMillis = now;
+//            checkNotifications();
+//        }
+//    }
+//
+//    private static void checkNotifications() {
+//        MinecraftClient client = MinecraftClient.getInstance();
+//        if (client.player == null) return;
+//
+//        if (remainingSeconds == 60) {
+//            sendAlert(client, "§e§l1 MINUTE §funtil Mutant spawn!", 1.0f);
+//        } else if (remainingSeconds == 15) {
+//            sendAlert(client, "§6§l15 SECONDS!", 1.2f);
+//        } else if (remainingSeconds <= 5 && remainingSeconds > 0) {
+//            sendAlert(client, "§c§l" + remainingSeconds + "s...", 1.5f);
+//        }
+//    }
+//
+//    private static void sendAlert(MinecraftClient client, String text, float pitch) {
+//        client.player.sendMessage(Text.literal("§b§lSkyRiver §8» " + text), false);
+//        client.execute(() -> {
+//            client.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 1.5f, pitch);
+//        });
+//    }
+//
+//    private static void displayVisualAlert() {
+//        MinecraftClient client = MinecraftClient.getInstance();
+//        if (client.player != null) {
+//            client.inGameHud.setTitleTicks(10, 70, 20);
+//            client.inGameHud.setTitle(Text.literal("§5§l⚠ BOSS DETECTED").formatted(Formatting.LIGHT_PURPLE));
+//            client.inGameHud.setSubtitle(Text.literal("§fThe Mutant Enderman has appeared!"));
+//            client.player.playSound(SoundEvents.ENTITY_WITHER_SPAWN, 0.8f, 1.0f);
+//        }
+//    }
+//
+//    public static String getTimerString() {
+//        if (remainingSeconds <= 0) return null;
+//        int min = remainingSeconds / 60;
+//        int sec = remainingSeconds % 60;
+//        return String.format("§5§lMutant: §f%02d:%02d", min, sec);
+//    }
+//
+//    public static boolean isBossDetected() {
+//        return remainingSeconds > 0;
+//    }
+//}

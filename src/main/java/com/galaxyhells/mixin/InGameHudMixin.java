@@ -1,7 +1,7 @@
 package com.galaxyhells.mixin;
 
 import com.galaxyhells.SkyRiverConfig;
-import com.galaxyhells.StatBarHandler;
+import com.galaxyhells.handler.StatBarHandler;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
@@ -17,35 +17,38 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class InGameHudMixin {
 
     @Shadow private Text overlayMessage;
+    @Shadow private int overlayRemaining; // Controla quanto tempo a msg fica na tela
 
-    // Cancela a Vida (Corações)
-    // Na 1.21.1 os parâmetros de renderHealthBar são esses:
     @Inject(method = "renderHealthBar", at = @At("HEAD"), cancellable = true)
     private void onRenderHealthBar(DrawContext context, PlayerEntity player, int x, int y, int lines, int regeneratingHeartIndex, float maxHealth, int lastHealth, int health, int absorption, boolean blinking, CallbackInfo ci) {
-        if (SkyRiverConfig.barraVidaAtiva) {
-            ci.cancel();
-        }
+        if (SkyRiverConfig.statsBarsEnabled) ci.cancel();
     }
 
-    // Cancela a Fome
     @Inject(method = "renderFood", at = @At("HEAD"), cancellable = true)
     private void onRenderFood(DrawContext context, PlayerEntity player, int top, int right, CallbackInfo ci) {
-        if (SkyRiverConfig.barraManaAtiva) {
-            ci.cancel();
+        if (SkyRiverConfig.statsBarsEnabled) ci.cancel();
+    }
+
+    @Inject(method = "setOverlayMessage", at = @At("HEAD"))
+    private void onSetOverlayMessage(Text message, boolean tinted, CallbackInfo ci) {
+        if (message != null) {
+            StatBarHandler.onActionbarMessage(message);
         }
     }
 
-    // O culpado do seu crash: renderOverlayMessage
-    // O Minecraft agora usa RenderTickCounter em vez de float tickDelta
     @Inject(method = "renderOverlayMessage", at = @At("HEAD"), cancellable = true)
     private void onRenderOverlayMessage(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (this.overlayMessage != null) {
-            String msg = this.overlayMessage.getString();
-            // Se for a mensagem de status, cancelamos a renderização desta vez
-            // Se NÃO for (ex: mensagem de "Você não pode dormir agora"), o ci.cancel() NÃO é chamado.
-            if (StatBarHandler.isStatusMessage(msg)) {
+        if (SkyRiverConfig.statsBarsEnabled && this.overlayMessage != null) {
+            String content = this.overlayMessage.getString();
+
+            // Lógica Inteligente:
+            // Só esconde a Action Bar original se ela contiver os símbolos de RPG.
+            // \u2764 = Coração, \u270e = Pena/Mana
+            if (content.contains("\u2764") || content.contains("\u270e")) {
                 ci.cancel();
             }
+            // Se for mensagem de "Herbalismo +10", ela não tem coração, então o código passa
+            // e o Minecraft desenha a mensagem normalmente.
         }
     }
 }
