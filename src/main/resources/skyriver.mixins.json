@@ -6,7 +6,7 @@
 		"ExampleMixin",
         "InGameHudMixin",
         "ChatHudMixin",
-        "EndermanGlowMixin",
+        "EndermanGlowMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -23,30 +23,36 @@ public class MutantTrackerHandler {
         HudRenderCallback.EVENT.register((context, tickCounter) -> {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player == null || client.world == null || client.options.hudHidden) return;
-            if (!SkyRiverConfig.statsBarsEnabled) return; // Reutilizando o toggle global
+
+            // CORREÇÃO: Usar a variável correta para o alerta do mutante
+            if (!SkyRiverConfig.bossAlertEnabled) return;
 
             int cx = client.getWindow().getScaledWidth() / 2;
             int cy = client.getWindow().getScaledHeight() / 2;
 
-            // 1. Renderizar Timer (Onde o mutante vai aparecer)
             renderCountdown(context, client, cx);
-
-            // 2. Renderizar Rastreador (Onde o mutante está agora)
             renderPointer(context, client, cx, cy);
         });
     }
 
     private static void renderCountdown(DrawContext context, MinecraftClient client, int cx) {
+        // Se active for false, o timer não aparece
         if (!active) return;
 
         long remaining = mutantSpawnTime - System.currentTimeMillis();
+
         if (remaining > 0) {
-            long seconds = remaining / 1000;
-            String text = String.format("§eMutante em: §f%02d:%02d", seconds / 60, seconds % 60);
+            long totalSeconds = remaining / 1000;
+            long minutes = totalSeconds / 60;
+            long seconds = totalSeconds % 60;
+
+            String text = String.format("§eMutante em: §f%02d:%02d", minutes, seconds);
             int tw = client.textRenderer.getWidth(text);
-            context.drawTextWithShadow(client.textRenderer, text, cx - (tw / 2), 20, 0xFFFFFF);
+
+            // Desenha o texto um pouco mais abaixo para não bater no chat
+            context.drawTextWithShadow(client.textRenderer, text, cx - (tw / 2), 40, 0xFFFFFF);
         } else {
-            active = false; // Timer acabou
+            active = false; // Desativa quando chega a zero
         }
     }
 
